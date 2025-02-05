@@ -21,7 +21,7 @@ Auto MIcont Service 是一个用于监控micont_service Windows服务状态并�
 操作选项卡 → 新建：
 操作：启动程序
 程序或脚本：pythonw.exe
-添加参数（可选）：C:\path\to\service_handler.py
+添加参数（可选）：C:\path\to\amis_r1.py
 起始于（可选）：C:\path\to\（脚本所在目录）
 确定保存任务
 
