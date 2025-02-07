@@ -2,6 +2,7 @@ import ctypes
 import sys
 import subprocess
 import time
+import winreg
 
 def is_service_running(service_name):
     """检查服务是否正在运行"""
@@ -42,7 +43,47 @@ def launch_program(program_path):
     except Exception as e:
         print(f"启动程序失败: {str(e)}")
 
+def add_to_startup():
+    """添加程序到开机启动项"""
+    try:
+        key = winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER,
+            r"Software\Microsoft\Windows\CurrentVersion\Run",
+            0, winreg.KEY_SET_VALUE | winreg.KEY_READ
+        )
+        
+        exe_path = sys.argv[0]
+        current_value = winreg.QueryValueEx(key, "MI Service Helper")[0]
+        if current_value == exe_path:
+            return
+    except FileNotFoundError:
+        pass
+    except WindowsError:
+        pass
+    
+    try:
+        winreg.SetValueEx(
+            key,
+            "MI Service Helper",
+            0,
+            winreg.REG_SZ,
+            exe_path
+        )
+        print("成功添加开机自启动")
+    except Exception as e:
+        print(f"注册表写入失败: {str(e)}")
+    finally:
+        winreg.CloseKey(key)
+
+def is_exe_file():
+    """判断当前是否已编译为exe"""
+    return sys.argv[0].lower().endswith('.exe')
+
 def main():
+    # 如果是exe文件则注册开机启动
+    if is_exe_file():
+        add_to_startup()
+    
     # 等待服务启动（最长等待5分钟）
     max_retries = 60
     service_name = "micont_service"
